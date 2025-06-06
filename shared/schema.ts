@@ -86,8 +86,11 @@ export const gifts = pgTable("gifts", {
   senderId: varchar("sender_id").notNull().references(() => users.id),
   receiverId: varchar("receiver_id").notNull().references(() => users.id),
   videoId: integer("video_id").notNull().references(() => videos.id),
-  giftType: varchar("gift_type").notNull(), // 'rose', 'diamond', 'crown', 'rocket'
+  giftType: varchar("gift_type").notNull(), // 'rose', 'diamond', 'crown', 'rocket', etc.
   amount: integer("amount").notNull(), // cost in coins
+  rarity: varchar("rarity").notNull().default("common"), // 'common', 'rare', 'epic', 'legendary'
+  emoji: varchar("emoji").notNull(),
+  name: varchar("name").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

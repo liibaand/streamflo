@@ -13,15 +13,19 @@ interface GiftModalProps {
 }
 
 const GIFTS = [
-  { id: "rose", emoji: "🌹", name: "Rose", amount: 1 },
-  { id: "heart", emoji: "❤️", name: "Heart", amount: 5 },
-  { id: "diamond", emoji: "💎", name: "Diamond", amount: 10 },
-  { id: "star", emoji: "⭐", name: "Star", amount: 25 },
-  { id: "crown", emoji: "👑", name: "Crown", amount: 50 },
-  { id: "rocket", emoji: "🚀", name: "Rocket", amount: 100 },
-  { id: "fire", emoji: "🔥", name: "Fire", amount: 200 },
-  { id: "unicorn", emoji: "🦄", name: "Unicorn", amount: 500 },
-];
+  { id: "rose", emoji: "🌹", name: "Rose", amount: 1, rarity: "common" },
+  { id: "heart", emoji: "❤️", name: "Heart", amount: 5, rarity: "common" },
+  { id: "kiss", emoji: "💋", name: "Kiss", amount: 10, rarity: "common" },
+  { id: "diamond", emoji: "💎", name: "Diamond", amount: 25, rarity: "rare" },
+  { id: "star", emoji: "⭐", name: "Star", amount: 50, rarity: "rare" },
+  { id: "crown", emoji: "👑", name: "Crown", amount: 100, rarity: "epic" },
+  { id: "rocket", emoji: "🚀", name: "Rocket", amount: 200, rarity: "epic" },
+  { id: "fire", emoji: "🔥", name: "Fire", amount: 300, rarity: "epic" },
+  { id: "unicorn", emoji: "🦄", name: "Unicorn", amount: 500, rarity: "legendary" },
+  { id: "galaxy", emoji: "🌌", name: "Galaxy", amount: 1000, rarity: "legendary" },
+  { id: "phoenix", emoji: "🔮", name: "Phoenix", amount: 2000, rarity: "legendary" },
+  { id: "dragon", emoji: "🐉", name: "Dragon", amount: 5000, rarity: "legendary" },
+] as const;
 
 export default function GiftModal({
   isOpen,
@@ -96,22 +100,68 @@ export default function GiftModal({
 
         {/* Gift Grid */}
         <div className="p-4">
-          <div className="grid grid-cols-4 gap-3 mb-6">
-            {GIFTS.map((gift) => (
-              <button
-                key={gift.id}
-                onClick={() => setSelectedGift(gift.id)}
-                className={`flex flex-col items-center space-y-2 p-3 rounded-xl transition-all duration-200 ${
-                  selectedGift === gift.id
-                    ? "bg-pink-500/20 border-2 border-pink-500"
-                    : "bg-gray-800 hover:bg-gray-700"
-                }`}
-              >
-                <div className="text-3xl">{gift.emoji}</div>
-                <span className="text-white text-xs font-medium">{gift.name}</span>
-                <span className="text-yellow-400 text-xs font-bold">${gift.amount}</span>
-              </button>
-            ))}
+          <div className="grid grid-cols-3 gap-3 mb-6 max-h-96 overflow-y-auto">
+            {GIFTS.map((gift) => {
+              const getRarityStyles = () => {
+                switch (gift.rarity) {
+                  case 'legendary':
+                    return {
+                      border: 'border-2 border-yellow-400/50',
+                      bg: 'bg-gradient-to-br from-yellow-900/30 to-orange-900/30',
+                      glow: selectedGift === gift.id ? 'shadow-lg shadow-yellow-400/20' : '',
+                      text: 'text-yellow-400'
+                    };
+                  case 'epic':
+                    return {
+                      border: 'border-2 border-purple-400/50',
+                      bg: 'bg-gradient-to-br from-purple-900/30 to-pink-900/30',
+                      glow: selectedGift === gift.id ? 'shadow-lg shadow-purple-400/20' : '',
+                      text: 'text-purple-400'
+                    };
+                  case 'rare':
+                    return {
+                      border: 'border-2 border-blue-400/50',
+                      bg: 'bg-gradient-to-br from-blue-900/30 to-cyan-900/30',
+                      glow: selectedGift === gift.id ? 'shadow-lg shadow-blue-400/20' : '',
+                      text: 'text-blue-400'
+                    };
+                  default:
+                    return {
+                      border: 'border border-gray-600',
+                      bg: 'bg-gray-800',
+                      glow: selectedGift === gift.id ? 'shadow-lg shadow-pink-500/20' : '',
+                      text: 'text-gray-400'
+                    };
+                }
+              };
+              
+              const styles = getRarityStyles();
+              
+              return (
+                <button
+                  key={gift.id}
+                  onClick={() => setSelectedGift(gift.id)}
+                  className={`flex flex-col items-center space-y-2 p-4 rounded-xl transition-all duration-300 transform hover:scale-105 ${
+                    styles.bg
+                  } ${styles.border} ${styles.glow} ${
+                    selectedGift === gift.id ? "ring-2 ring-pink-500 scale-105" : "hover:bg-gray-700"
+                  }`}
+                >
+                  <div className={`text-4xl ${gift.rarity === 'legendary' ? 'animate-pulse' : ''}`}>
+                    {gift.emoji}
+                  </div>
+                  <span className="text-white text-xs font-medium text-center leading-tight">
+                    {gift.name}
+                  </span>
+                  <span className={`text-xs font-bold ${styles.text}`}>
+                    ${gift.amount}
+                  </span>
+                  <div className={`text-[10px] uppercase tracking-wider font-bold ${styles.text}`}>
+                    {gift.rarity}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
           {/* Send Button */}

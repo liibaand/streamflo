@@ -27,7 +27,7 @@ export function getSession() {
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
+    createTableIfMissing: true,
     ttl: sessionTtl,
     tableName: "sessions",
   });
@@ -59,6 +59,7 @@ async function upsertUser(
 ) {
   await storage.upsertUser({
     id: claims["sub"],
+    username: claims["preferred_username"] || claims["email"]?.split('@')[0] || `user_${claims["sub"]}`,
     email: claims["email"],
     firstName: claims["first_name"],
     lastName: claims["last_name"],
