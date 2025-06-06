@@ -344,6 +344,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Discover routes
+  app.get('/api/discover', async (req, res) => {
+    try {
+      const { category, search } = req.query;
+      let videos = await storage.getVideos(20, 0);
+      
+      // Get user info for each video
+      const videosWithUsers = await Promise.all(
+        videos.map(async (video) => {
+          const user = await storage.getUser(video.userId);
+          return { ...video, user };
+        })
+      );
+      
+      res.json(videosWithUsers);
+    } catch (error) {
+      console.error("Error fetching discover content:", error);
+      res.status(500).json({ message: "Failed to fetch content" });
+    }
+  });
+
+  // Live streaming routes
+  app.get('/api/live', async (req, res) => {
+    try {
+      const liveStreams = [
+        {
+          id: 1,
+          title: "Gaming Session",
+          viewers: 1250,
+          user: { username: "gamer123", profileImageUrl: null },
+          thumbnail: "https://picsum.photos/400/600?random=live1"
+        },
+        {
+          id: 2,
+          title: "Cooking Show",
+          viewers: 890,
+          user: { username: "chef_master", profileImageUrl: null },
+          thumbnail: "https://picsum.photos/400/600?random=live2"
+        }
+      ];
+      res.json(liveStreams);
+    } catch (error) {
+      console.error("Error fetching live streams:", error);
+      res.status(500).json({ message: "Failed to fetch live streams" });
+    }
+  });
+
+  app.post('/api/live/start', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { title, description } = req.body;
+      
+      const streamKey = `stream_${userId}_${Date.now()}`;
+      
+      res.json({
+        streamKey,
+        streamUrl: `rtmp://localhost:1935/live/${streamKey}`,
+        playbackUrl: `http://localhost:8080/live/${streamKey}/index.m3u8`
+      });
+    } catch (error) {
+      console.error("Error starting live stream:", error);
+      res.status(500).json({ message: "Failed to start live stream" });
+    }
+  });
+
+  app.post('/api/live/end', isAuthenticated, async (req, res) => {
+    try {
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error ending live stream:", error);
+      res.status(500).json({ message: "Failed to end live stream" });
+    }
+  });
+
+  // Coin system routes
+  app.get('/api/coins/balance', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      res.json({
+        amount: user?.coins || 0,
+        totalSpent: 0,
+        totalEarned: 0
+      });
+    } catch (error) {
+      console.error("Error fetching coin balance:", error);
+      res.status(500).json({ message: "Failed to fetch balance" });
+    }
+  });
+
+  app.get('/api/coins/transactions', isAuthenticated, async (req, res) => {
+    try {
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  app.post('/api/coins/purchase', isAuthenticated, async (req: any, res) => {
+    try {
+      const { packageType, coinAmount, priceUsd } = req.body;
+      const userId = req.user.claims.sub;
+      
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res.status(500).json({ message: "Stripe not configured" });
+      }
+
+      const Stripe = require('stripe');
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+      // Create Stripe checkout session
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
+          {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: `${coinAmount} Coins Package`,
+                description: `${packageType} package - ${coinAmount} coins`,
+              },
+              unit_amount: Math.round(parseFloat(priceUsd) * 100), // Convert to cents
+            },
+            quantity: 1,
+          },
+        ],
+        mode: 'payment',
+        success_url: `${req.get('origin')}/coins?success=true`,
+        cancel_url: `${req.get('origin')}/coins?canceled=true`,
+        metadata: {
+          userId,
+          packageType,
+          coinAmount: coinAmount.toString(),
+        },
+      });
+
+      res.json({
+        success: true,
+        checkoutUrl: session.url,
+      });
+    } catch (error) {
+      console.error("Error purchasing coins:", error);
+      res.status(500).json({ message: "Failed to purchase coins" });
+    }
+  });
+
+  // Profile routes
+  app.get('/api/users/:id', async (req, res) => {
+    try {
+      const userId = req.params.id;
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const videos = await storage.getVideosByUserId(userId);
+      res.json({ ...user, videos });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
   // Serve uploaded files
   app.use('/uploads', express.static('uploads'));
 

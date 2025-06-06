@@ -229,7 +229,7 @@ export default function Coins() {
                 <CardContent className="space-y-4">
                   <div className="text-center">
                     <div className="flex items-center justify-center space-x-2 mb-2">
-                      <Coins className="w-6 h-6 text-yellow-500" />
+                      <CoinsIcon className="w-6 h-6 text-yellow-500" />
                       <span className="text-3xl font-bold">{formatNumber(pkg.coins)}</span>
                     </div>
                     {pkg.bonus > 0 && (
@@ -300,7 +300,7 @@ export default function Coins() {
                       ) : transaction.type === "gift_sent" ? (
                         <Gift className="w-5 h-5" />
                       ) : (
-                        <Coins className="w-5 h-5" />
+                        <CoinsIcon className="w-5 h-5" />
                       )}
                     </div>
                     <div>
@@ -326,7 +326,7 @@ export default function Coins() {
             <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6 text-center">
                 <div className="w-12 h-12 bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Coins className="w-6 h-6 text-black" />
+                  <CoinsIcon className="w-6 h-6 text-black" />
                 </div>
                 <h4 className="font-semibold mb-2">Purchase Coins</h4>
                 <p className="text-sm text-gray-400">Buy coin packages to support your favorite creators</p>
