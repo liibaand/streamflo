@@ -73,6 +73,9 @@ export default function GiftModal({
       giftType: gift.id,
       amount: gift.amount,
       receiverId: video.userId,
+      rarity: gift.rarity,
+      emoji: gift.emoji,
+      name: gift.name,
     });
   };
 

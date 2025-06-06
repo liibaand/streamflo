@@ -223,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const senderId = req.user.claims.sub;
       const videoId = parseInt(req.params.videoId);
-      const { giftType, amount, receiverId } = req.body;
+      const { giftType, amount, receiverId, rarity, emoji, name } = req.body;
       
       const giftData = insertGiftSchema.parse({
         senderId,
@@ -231,9 +231,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         videoId,
         giftType,
         amount,
+        rarity: rarity || 'common',
+        emoji: emoji || '🎁',
+        name: name || 'Gift',
       });
       
       const gift = await storage.createGift(giftData);
+      
+      // Get sender info for real-time broadcast
+      const sender = await storage.getUser(senderId);
+      
+      // Broadcast gift to all connected clients
+      const giftMessage = {
+        type: 'gift',
+        videoId,
+        data: {
+          gift: {
+            id: giftType,
+            emoji,
+            name,
+            amount,
+            rarity
+          },
+          sender: {
+            username: sender?.username || 'Anonymous',
+            profileImageUrl: sender?.profileImageUrl
+          }
+        },
+        timestamp: new Date().toISOString()
+      };
+      
+      // Broadcast to WebSocket clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(giftMessage));
+        }
+      });
+      
       res.json(gift);
     } catch (error) {
       console.error("Error sending gift:", error);

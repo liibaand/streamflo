@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import VideoActions from "./VideoActions";
+import LiveGiftSystem from "./LiveGiftSystem";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Music } from "lucide-react";
@@ -184,6 +185,9 @@ export default function VideoPlayer({
           sendMessage={sendMessage}
         />
       </div>
+
+      {/* Live Gift System */}
+      <LiveGiftSystem videoId={video.id} isActive={isActive} />
 
       {/* Heart Animations */}
       {showHearts.map((heart) => (
