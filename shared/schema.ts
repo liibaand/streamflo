@@ -36,6 +36,7 @@ export const users = pgTable("users", {
   followersCount: integer("followers_count").default(0),
   followingCount: integer("following_count").default(0),
   bio: text("bio"),
+  coins: integer("coins").default(0),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
