@@ -7,6 +7,9 @@ import { useAuth } from "@/hooks/useAuth";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
 import Profile from "@/pages/profile";
+import Discover from "@/pages/discover";
+import Live from "@/pages/live";
+import Coins from "@/pages/coins";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -19,6 +22,9 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/discover" component={Discover} />
+          <Route path="/live" component={Live} />
+          <Route path="/coins" component={Coins} />
           <Route path="/profile" component={Profile} />
           <Route path="/profile/:userId" component={Profile} />
         </>

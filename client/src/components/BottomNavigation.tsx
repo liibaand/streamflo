@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { Home, Search, Plus, Mail, User } from "lucide-react";
+import { Home, Search, Radio, Coins, User } from "lucide-react";
 
 export default function BottomNavigation() {
   const [location, setLocation] = useLocation();
@@ -7,8 +7,8 @@ export default function BottomNavigation() {
   const navItems = [
     { icon: Home, label: "Home", path: "/" },
     { icon: Search, label: "Discover", path: "/discover" },
-    { icon: Plus, label: "Upload", path: "/upload", special: true },
-    { icon: Mail, label: "Inbox", path: "/inbox" },
+    { icon: Radio, label: "Live", path: "/live", special: true },
+    { icon: Coins, label: "Coins", path: "/coins" },
     { icon: User, label: "Profile", path: "/profile" },
   ];
 
