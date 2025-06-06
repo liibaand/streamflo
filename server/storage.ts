@@ -25,6 +25,7 @@ export interface IStorage {
   // User operations (required for Replit Auth)
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUserCoins(userId: string, amount: number): Promise<User>;
   
   // Video operations
   getVideos(limit?: number, offset?: number): Promise<Video[]>;
@@ -62,7 +63,11 @@ export class DatabaseStorage implements IStorage {
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        ...userData,
+        username: userData.username || `user_${userData.id}`,
+        coins: userData.coins || 0,
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
@@ -70,6 +75,18 @@ export class DatabaseStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUserCoins(userId: string, amount: number): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        coins: sql`${users.coins} + ${amount}`,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }
