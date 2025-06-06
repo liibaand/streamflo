@@ -32,7 +32,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const limit = parseInt(req.query.limit as string) || 20;
       const offset = parseInt(req.query.offset as string) || 0;
-      const videos = await storage.getVideos(limit, offset);
+      let videos = await storage.getVideos(limit, offset);
+      
+      // Add sample videos if database is empty
+      if (videos.length === 0 && offset === 0) {
+        const currentUser = (req.user as any)?.claims?.sub || 'demo-user';
+        
+        const sampleVideos = [
+          {
+            userId: currentUser,
+            title: 'Amazing Dance Moves',
+            description: 'Check out these incredible dance moves! Perfect for the weekend vibes.',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+            thumbnailUrl: 'https://picsum.photos/400/600?random=1',
+            duration: 15,
+            hashtags: ['dance', 'trending', 'viral'],
+            musicInfo: 'Trending Beat - Dance Mix',
+            isPrivate: false,
+            allowComments: true,
+            allowDownloads: true
+          },
+          {
+            userId: currentUser,
+            title: 'Cooking Life Hack',
+            description: 'This simple kitchen trick will change how you cook forever!',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+            thumbnailUrl: 'https://picsum.photos/400/600?random=2',
+            duration: 12,
+            hashtags: ['cooking', 'lifehack', 'tips'],
+            musicInfo: 'Kitchen Vibes - Cooking Beats',
+            isPrivate: false,
+            allowComments: true,
+            allowDownloads: true
+          },
+          {
+            userId: currentUser,
+            title: 'Travel Adventure',
+            description: 'Exploring hidden gems around the world. Where should I go next?',
+            videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+            thumbnailUrl: 'https://picsum.photos/400/600?random=3',
+            duration: 20,
+            hashtags: ['travel', 'adventure', 'explore'],
+            musicInfo: 'Adventure Time - Travel Mix',
+            isPrivate: false,
+            allowComments: true,
+            allowDownloads: true
+          }
+        ];
+
+        for (const videoData of sampleVideos) {
+          try {
+            await storage.createVideo(videoData);
+          } catch (error) {
+            console.log('Sample video creation skipped:', (error as Error).message);
+          }
+        }
+        
+        videos = await storage.getVideos(limit, offset);
+      }
       
       // Get user info for each video
       const videosWithUsers = await Promise.all(

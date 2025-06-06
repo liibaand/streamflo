@@ -15,9 +15,36 @@ export default function VideoFeed() {
   const startY = useRef(0);
   const isDragging = useRef(false);
 
-  const { data: videos, isLoading } = useQuery({
+  const { data: videos, isLoading, refetch } = useQuery({
     queryKey: ["/api/videos"],
   });
+
+  // Show upload prompt when no videos exist
+  if (!isLoading && (!videos || videos.length === 0)) {
+    return (
+      <div className="h-screen bg-black flex flex-col items-center justify-center text-white px-6">
+        <div className="text-8xl mb-6">📱</div>
+        <h2 className="text-3xl font-bold mb-4 text-center">Create Your First Video</h2>
+        <p className="text-gray-400 text-lg text-center mb-8 max-w-md">
+          Upload a video to get started with your TikTok-style feed
+        </p>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => refetch()}
+            className="bg-white text-black px-6 py-3 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+          >
+            Refresh Feed
+          </button>
+          <button 
+            onClick={() => setShowUpload(true)}
+            className="bg-pink-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-pink-600 transition-colors"
+          >
+            Upload Video
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const { sendMessage } = useWebSocket((message) => {
     // Handle real-time updates like new comments, gifts, etc.

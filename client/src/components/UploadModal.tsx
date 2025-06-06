@@ -56,6 +56,7 @@ export default function UploadModal({ isOpen, onClose }: UploadModalProps) {
     formData.append("title", title.trim());
     formData.append("description", description.trim());
     formData.append("isPublic", String(isPublic));
+    formData.append("allowComments", String(allowComments));
 
     uploadMutation.mutate(formData);
   };
